@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bwj3xaqhbubv3"]
+
+[ext_resource type="Script" uid="uid://c8r7eoxh58rv0" path="res://player_test.gd" id="1_u52ul"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_j3t2j"]
+size = Vector2(100, 100)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_j3t2j"]
+
+[node name="Node3D" type="Node3D" unique_id=472994791]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1834569809]
+transform = Transform3D(-0.8660254, -0.43301278, 0.24999999, -0.222568, 0.7815834, 0.58274424, -0.44773152, 0.44902927, -0.77324593, 0, 1.4019676, -3.2087622)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1256221764]
+transform = Transform3D(1, 0, 0, 0, 0.9613656, -0.2752752, 0, 0.2752752, 0.9613656, 0, 0.36168185, 1.0877353)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1901734213]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0007529259, 0.0032721162, -0.00013148785)
+mesh = SubResource("PlaneMesh_j3t2j")
+
+[node name="player_test" type="MeshInstance3D" parent="." unique_id=874114340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1548941, -2.7007926)
+mesh = SubResource("CapsuleMesh_j3t2j")
+script = ExtResource("1_u52ul")
