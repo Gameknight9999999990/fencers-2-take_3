@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "../include/sockets.h"
 #include "../include/serialization.h"
 
@@ -7,24 +8,37 @@ typedef struct Point {
     float y;
 } Point;
 
+typedef struct Test {
+    O
+} Test;
+
+/*
 void Point_serialize(Buffer* buffer, const void* obj) {
     const Point* point = (Point*)obj;
 
     WRITE_FLOAT(buffer, point->x);
     WRITE_FLOAT(buffer, point->y);
 }
+*/
 
+Field fields[] = { { FIELDTYPE_FLOAT, offsetof(Point, x) }, { FIELDTYPE_FLOAT, offsetof(Point, y) } };
+GENETATE_SERIALIZE_FUNC(Point_serialize, fields, 2)
+
+/*
 void Point_deserialize(Buffer* buffer, const size_t addr, void* obj) {
     Point* point = (Point*)obj;
 
     READ_FLOAT(buffer, addr, &point->x);
     READ_FLOAT(buffer, addr + sizeof(float), &point->y);
 }
+*/
+GENERATE_DESERIALIZE_FUNC(Point_deserialize, fields, 2)
 
 Point Point_create(float x, float y) {
     Point point = { .x = x, .y = y };
     ATTACH_SERIALIZER(point, Point_serialize);
     ATTACH_DESERIALIZER(point, Point_deserialize);
+    ATTACH_SIZE(point, Point);
 
     return point;
 }

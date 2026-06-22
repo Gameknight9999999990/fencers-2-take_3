@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
+#include <stddef.h>
 
 typedef struct Buffer {
     uint8_t* raw;
@@ -156,13 +158,116 @@ typedef struct SerializeBase {
 } SerializeBase;
 
 #define SERIALIZER_BASE_NAME __serializer_base
+#define SERIALIZER_SIZE_NAME __serializer_size
 
-#define OBJECT_SERIALIZABLE SerializeBase SERIALIZER_BASE_NAME;
+#define OBJECT_SERIALIZABLE SerializeBase SERIALIZER_BASE_NAME; size_t SERIALIZER_SIZE_NAME;
 
 #define ATTACH_SERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.serialize = func
 #define ATTACH_DESERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.deserialize = func
+#define ATTACH_SIZE(obj, type) obj.SERIALIZER_SIZE_NAME = sizeof(type)
 
 #define SERIALIZE(buffer, obj) obj.SERIALIZER_BASE_NAME.serialize(buffer, (const void*)&obj)
 #define DESERIALIZE(buffer, addr, obj) obj.SERIALIZER_BASE_NAME.deserialize(buffer, addr, (void*)&obj)
+
+#define FIELD_TYPE_LIST(X) \
+    X(INT8) \
+    X(INT16) \
+    X(INT32) \
+    X(INT64) \
+    X(FLOAT) \
+    X(DOUBLE) \
+    X(STR) \
+    X(CUSTOM)
+
+typedef enum FieldTypes {
+    #define X(type) FIELDTYPE_##type,
+    FIELD_TYPE_LIST(X)
+    #undef X
+} FieldTypes;
+
+typedef struct Field {
+    FieldTypes type;
+    size_t offset;
+} Field;
+
+#define GENETATE_SERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, const void* obj) { \
+    for (size_t i = 0; i < num_fields; i++) { \
+        switch (fields[i].type) { \
+            case FIELDTYPE_INT8: \
+                WRITE_8(buffer, *((uint8_t*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_INT16: \
+                WRITE_16(buffer, *((uint16_t*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_INT32: \
+                WRITE_32(buffer, *((uint32_t*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_INT64: \
+                WRITE_64(buffer, *((uint64_t*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_FLOAT: \
+                WRITE_FLOAT(buffer, *((float*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_DOUBLE: \
+                WRITE_DOUBLE(buffer, *((double*)((char*)obj + fields[i].offset))); \
+                break; \
+            case FIELDTYPE_STR: \
+                WRITE_STR(buffer, (char*)((char*)obj + fields[i].offset)); \
+                break; \
+            case FIELDTYPE_CUSTOM: ; \
+                SerializeBase* base = (SerializeBase*)obj; \
+                SerializeFunc func = base->serialize; \
+                void* ptr = (void*)((char*)obj + fields[i].offset); \
+                func(buffer, ptr); \
+                break; \
+        } \
+    } \
+}
+
+#define GENERATE_DESERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, const size_t addr, void* obj) { \
+    size_t curr = addr; \
+    for (size_t i = 0; i < num_fields; i++) { \
+        switch (fields[i].type) { \
+            case FIELDTYPE_INT8: \
+                READ_8(buffer, curr, (uint8_t*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(uint8_t); \
+                break; \
+            case FIELDTYPE_INT16: \
+                READ_16(buffer, curr, (uint16_t*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(uint16_t); \
+                break; \
+            case FIELDTYPE_INT32: \
+                READ_32(buffer, curr, (uint32_t*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(uint32_t); \
+                break; \
+            case FIELDTYPE_INT64: \
+                READ_64(buffer, curr, (uint64_t*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(uint64_t); \
+                break; \
+            case FIELDTYPE_FLOAT: \
+                READ_FLOAT(buffer, curr, (float*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(float); \
+                break; \
+            case FIELDTYPE_DOUBLE: \
+                READ_DOUBLE(buffer, curr, (double*)((char*)obj + fields[i].offset)); \
+                curr += sizeof(double); \
+                break; \
+            case FIELDTYPE_STR: ; \
+                uint64_t size = 0; \
+                READ_64(buffer, curr, &size); \
+                READ_STR(buffer, curr, (char*)((char*)obj + fields[i].offset)); \
+                curr += size; \
+                break; \
+            case FIELDTYPE_CUSTOM: ; \
+                SerializeBase* base = (SerializeBase*)obj; \
+                size_t* custom_size = (size_t*)((char*)obj + sizeof(SerializeBase)); \
+                DeserializeFunc func = base->deserialize; \
+                void* ptr = (void*)((char*)obj + fields[i].offset); \
+                func(buffer, curr, ptr); \
+                curr += *custom_size; \
+                break; \
+        } \
+    } \
+}
 
 #endif
