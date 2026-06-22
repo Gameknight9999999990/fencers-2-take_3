@@ -1,9 +1,14 @@
 [gd_scene format=3 uid="uid://bwj3xaqhbubv3"]
 
 [ext_resource type="PackedScene" uid="uid://dgdefelxw4jhd" path="res://player.tscn" id="1_u52ul"]
+[ext_resource type="Texture2D" uid="uid://kj1boxhx58cy" path="res://templategrid_albedo.png" id="1_vonw3"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j3t2j"]
 size = Vector2(100, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvrn3"]
+albedo_texture = ExtResource("1_vonw3")
+uv1_scale = Vector3(20, 20, 20)
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_vonw3"]
 data = PackedVector3Array(50, 0, 50, -50, 0, 50, 50, 0, -50, -50, 0, 50, -50, 0, -50, 50, 0, -50)
@@ -15,8 +20,9 @@ transform = Transform3D(-0.8660254, -0.43301278, 0.24999999, -0.222568, 0.781583
 shadow_enabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1901734213]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0007529259, 0.0032721162, -0.00013148785)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -0.037651002, 0.0194875)
 mesh = SubResource("PlaneMesh_j3t2j")
+surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D" unique_id=1608377242]
 
