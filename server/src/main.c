@@ -1,6 +1,34 @@
 #include "../include/sockets.h"
 #include "../include/serialization.h"
 
+typedef struct Point {
+    OBJECT_SERIALIZABLE
+    float x;
+    float y;
+} Point;
+
+void Point_serialize(Buffer* buffer, const void* obj) {
+    const Point* point = (Point*)obj;
+
+    WRITE_FLOAT(buffer, point->x);
+    WRITE_FLOAT(buffer, point->y);
+}
+
+void Point_deserialize(Buffer* buffer, const size_t addr, void* obj) {
+    Point* point = (Point*)obj;
+
+    READ_FLOAT(buffer, addr, &point->x);
+    READ_FLOAT(buffer, addr + sizeof(float), &point->y);
+}
+
+Point Point_create(float x, float y) {
+    Point point = { .x = x, .y = y };
+    ATTACH_SERIALIZER(point, Point_serialize);
+    ATTACH_DESERIALIZER(point, Point_deserialize);
+
+    return point;
+}
+
 int main(/*int argc, char* argv[]*/) {
     /*
     if (argc < 2) {
@@ -34,20 +62,17 @@ int main(/*int argc, char* argv[]*/) {
 
     Buffer buffer = Buffer_create(1024);
 
-    WRITE_FLOAT(&buffer, 1.25);
-    WRITE_DOUBLE(&buffer, 3.14159);
+    Point point = Point_create(0.5f, 10.25f);
+    SERIALIZE(&buffer, point);
 
     FILE* file = fopen("test.bin", "wb");
     fwrite(buffer.raw, sizeof(uint8_t), buffer.size, file);
     fclose(file);
 
-    float f_val;
-    double d_val;
+    Point read = Point_create(0.0f, 0.0f);
+    DESERIALIZE(&buffer, 0, read);
 
-    READ_FLOAT(&buffer, 0, &f_val);
-    READ_DOUBLE(&buffer, sizeof(float), &d_val);
-
-    printf("Float: %f\nDouble: %f\n", f_val, d_val);
+    printf("%f %f\n", read.x, read.y);
 
     Buffer_destroy(&buffer);
 

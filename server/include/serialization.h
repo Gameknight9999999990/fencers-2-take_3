@@ -147,4 +147,22 @@ void Buffer_destroy(Buffer* buffer);
     }                                                              \
 } while (0)
 
+typedef void (*SerializeFunc)(Buffer*, const void*);
+typedef void (*DeserializeFunc)(Buffer*, const size_t, void*);
+
+typedef struct SerializeBase {
+    SerializeFunc serialize;
+    DeserializeFunc deserialize;
+} SerializeBase;
+
+#define SERIALIZER_BASE_NAME __serializer_base
+
+#define OBJECT_SERIALIZABLE SerializeBase SERIALIZER_BASE_NAME;
+
+#define ATTACH_SERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.serialize = func
+#define ATTACH_DESERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.deserialize = func
+
+#define SERIALIZE(buffer, obj) obj.SERIALIZER_BASE_NAME.serialize(buffer, (const void*)&obj)
+#define DESERIALIZE(buffer, addr, obj) obj.SERIALIZER_BASE_NAME.deserialize(buffer, addr, (void*)&obj)
+
 #endif
