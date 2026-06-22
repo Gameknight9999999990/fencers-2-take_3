@@ -1,6 +1,8 @@
 #include "../include/sockets.h"
+#include "../include/serialization.h"
 
-int main(int argc, char* argv[]) {
+int main(/*int argc, char* argv[]*/) {
+    /*
     if (argc < 2) {
         printf("Must have the port as an argument\n");
         return -1;
@@ -28,6 +30,26 @@ int main(int argc, char* argv[]) {
     }
 
     Server_stop(&server);
+    */
+
+    Buffer buffer = Buffer_create(1024);
+
+    WRITE_FLOAT(&buffer, 1.25);
+    WRITE_DOUBLE(&buffer, 3.14159);
+
+    FILE* file = fopen("test.bin", "wb");
+    fwrite(buffer.raw, sizeof(uint8_t), buffer.size, file);
+    fclose(file);
+
+    float f_val;
+    double d_val;
+
+    READ_FLOAT(&buffer, 0, &f_val);
+    READ_DOUBLE(&buffer, sizeof(float), &d_val);
+
+    printf("Float: %f\nDouble: %f\n", f_val, d_val);
+
+    Buffer_destroy(&buffer);
 
     return 0;
 }

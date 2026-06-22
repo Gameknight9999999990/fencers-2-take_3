@@ -11,6 +11,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 add_executable(${CMAKE_PROJECT_NAME}
     src/sockets.c
+    src/serialization.c
     src/main.c
 )
 
@@ -19,4 +20,5 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
     -Wextra
     -Werror
     -Wpedantic
+    -g
 )
