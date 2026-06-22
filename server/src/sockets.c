@@ -6,6 +6,7 @@ Server Server_start(uint16_t port) {
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
         perror("socket");
+        server.fd = -1;
         return server;
     }
 

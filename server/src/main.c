@@ -7,6 +7,9 @@ int main(int argc, char* argv[]) {
     }
 
     Server server = Server_start(atoi(argv[1]));
+    if (server.fd < 0) {
+        return -1;
+    }
     
     while (1) {
         ssize_t size = 1024;
