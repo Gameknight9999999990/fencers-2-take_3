@@ -4,43 +4,41 @@
 
 typedef struct Point {
     OBJECT_SERIALIZABLE
-    float x;
-    float y;
+    uint8_t x;
+    uint8_t y;
 } Point;
 
-typedef struct Test {
-    O
-} Test;
+Field point_fields[] = { { FIELDTYPE_INT8, offsetof(Point, x) }, { FIELDTYPE_INT8, offsetof(Point, y) } };
 
-/*
-void Point_serialize(Buffer* buffer, const void* obj) {
-    const Point* point = (Point*)obj;
+GENETATE_SERIALIZE_FUNC(Point_serialize, point_fields, 2)
+GENERATE_DESERIALIZE_FUNC(Point_deserialize, point_fields, 2)
 
-    WRITE_FLOAT(buffer, point->x);
-    WRITE_FLOAT(buffer, point->y);
-}
-*/
-
-Field fields[] = { { FIELDTYPE_FLOAT, offsetof(Point, x) }, { FIELDTYPE_FLOAT, offsetof(Point, y) } };
-GENETATE_SERIALIZE_FUNC(Point_serialize, fields, 2)
-
-/*
-void Point_deserialize(Buffer* buffer, const size_t addr, void* obj) {
-    Point* point = (Point*)obj;
-
-    READ_FLOAT(buffer, addr, &point->x);
-    READ_FLOAT(buffer, addr + sizeof(float), &point->y);
-}
-*/
-GENERATE_DESERIALIZE_FUNC(Point_deserialize, fields, 2)
-
-Point Point_create(float x, float y) {
+Point Point_create(uint8_t x, uint8_t y) {
     Point point = { .x = x, .y = y };
     ATTACH_SERIALIZER(point, Point_serialize);
     ATTACH_DESERIALIZER(point, Point_deserialize);
     ATTACH_SIZE(point, Point);
 
     return point;
+}
+
+typedef struct Test {
+    OBJECT_SERIALIZABLE
+    Point p1;
+} Test;
+
+Field test_fields[] = { { FIELDTYPE_CUSTOM, offsetof(Test, p1) } };
+
+GENETATE_SERIALIZE_FUNC(Test_serialize, test_fields, 1)
+GENERATE_DESERIALIZE_FUNC(Test_deserialize, test_fields, 1)
+
+Test Test_create(Point p1) {
+    Test test = { .p1 = p1 };
+    ATTACH_SERIALIZER(test, Test_serialize);
+    ATTACH_DESERIALIZER(test, Test_deserialize);
+    ATTACH_SIZE(test, Test);
+
+    return test;
 }
 
 int main(/*int argc, char* argv[]*/) {
@@ -74,19 +72,20 @@ int main(/*int argc, char* argv[]*/) {
     Server_stop(&server);
     */
 
-    Buffer buffer = Buffer_create(1024);
+    Buffer buffer = Buffer_create(2048);
 
-    Point point = Point_create(0.5f, 10.25f);
-    SERIALIZE(&buffer, point);
+    Point point = Point_create(123, 213);
+    Test test = Test_create(point);
+
+    SERIALIZE(&buffer, test);
 
     FILE* file = fopen("test.bin", "wb");
     fwrite(buffer.raw, sizeof(uint8_t), buffer.size, file);
     fclose(file);
 
-    Point read = Point_create(0.0f, 0.0f);
+    Test read = Test_create(Point_create(0, 0));
     DESERIALIZE(&buffer, 0, read);
-
-    printf("%f %f\n", read.x, read.y);
+    printf("%d %d\n", read.p1.x, read.p1.y);
 
     Buffer_destroy(&buffer);
 

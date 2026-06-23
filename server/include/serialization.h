@@ -155,16 +155,16 @@ typedef void (*DeserializeFunc)(Buffer*, const size_t, void*);
 typedef struct SerializeBase {
     SerializeFunc serialize;
     DeserializeFunc deserialize;
+    size_t size;
 } SerializeBase;
 
 #define SERIALIZER_BASE_NAME __serializer_base
-#define SERIALIZER_SIZE_NAME __serializer_size
 
-#define OBJECT_SERIALIZABLE SerializeBase SERIALIZER_BASE_NAME; size_t SERIALIZER_SIZE_NAME;
+#define OBJECT_SERIALIZABLE SerializeBase SERIALIZER_BASE_NAME;
 
 #define ATTACH_SERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.serialize = func
 #define ATTACH_DESERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.deserialize = func
-#define ATTACH_SIZE(obj, type) obj.SERIALIZER_SIZE_NAME = sizeof(type)
+#define ATTACH_SIZE(obj, type) obj.SERIALIZER_BASE_NAME.size = sizeof(type)
 
 #define SERIALIZE(buffer, obj) obj.SERIALIZER_BASE_NAME.serialize(buffer, (const void*)&obj)
 #define DESERIALIZE(buffer, addr, obj) obj.SERIALIZER_BASE_NAME.deserialize(buffer, addr, (void*)&obj)
@@ -215,7 +215,7 @@ typedef struct Field {
                 WRITE_STR(buffer, (char*)((char*)obj + fields[i].offset)); \
                 break; \
             case FIELDTYPE_CUSTOM: ; \
-                SerializeBase* base = (SerializeBase*)obj; \
+                SerializeBase* base = (SerializeBase*)((char*)obj + fields[i].offset); \
                 SerializeFunc func = base->serialize; \
                 void* ptr = (void*)((char*)obj + fields[i].offset); \
                 func(buffer, ptr); \
@@ -259,12 +259,11 @@ typedef struct Field {
                 curr += size; \
                 break; \
             case FIELDTYPE_CUSTOM: ; \
-                SerializeBase* base = (SerializeBase*)obj; \
-                size_t* custom_size = (size_t*)((char*)obj + sizeof(SerializeBase)); \
+                SerializeBase* base = (SerializeBase*)((char*)obj + fields[i].offset); \
                 DeserializeFunc func = base->deserialize; \
                 void* ptr = (void*)((char*)obj + fields[i].offset); \
                 func(buffer, curr, ptr); \
-                curr += *custom_size; \
+                curr += base->size; \
                 break; \
         } \
     } \
