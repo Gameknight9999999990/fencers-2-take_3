@@ -10,14 +10,14 @@ typedef struct Point {
 
 Field point_fields[] = { { FIELDTYPE_INT8, offsetof(Point, x) }, { FIELDTYPE_INT8, offsetof(Point, y) } };
 
-GENETATE_SERIALIZE_FUNC(Point_serialize, point_fields, 2)
-GENERATE_DESERIALIZE_FUNC(Point_deserialize, point_fields, 2)
+IMPL_SERIALIZE_FUNC(Point_serialize, point_fields, 2)
+IMPL_DESERIALIZE_FUNC(Point_deserialize, point_fields, 2)
 
 Point Point_create(uint8_t x, uint8_t y) {
     Point point = { .x = x, .y = y };
     ATTACH_SERIALIZER(point, Point_serialize);
     ATTACH_DESERIALIZER(point, Point_deserialize);
-    ATTACH_SIZE(point, Point);
+    ATTACH_SIZE(point, sizeof(uint8_t) + sizeof(uint8_t));
 
     return point;
 }
@@ -25,18 +25,19 @@ Point Point_create(uint8_t x, uint8_t y) {
 typedef struct Test {
     OBJECT_SERIALIZABLE
     Point p1;
+    Point p2;
 } Test;
 
-Field test_fields[] = { { FIELDTYPE_CUSTOM, offsetof(Test, p1) } };
+Field test_fields[] = { { FIELDTYPE_CUSTOM, offsetof(Test, p1) }, { FIELDTYPE_CUSTOM, offsetof(Test, p2) } };
 
-GENETATE_SERIALIZE_FUNC(Test_serialize, test_fields, 1)
-GENERATE_DESERIALIZE_FUNC(Test_deserialize, test_fields, 1)
+IMPL_SERIALIZE_FUNC(Test_serialize, test_fields, 2)
+IMPL_DESERIALIZE_FUNC(Test_deserialize, test_fields, 2)
 
-Test Test_create(Point p1) {
-    Test test = { .p1 = p1 };
+Test Test_create(Point p1, Point p2) {
+    Test test = { .p1 = p1, .p2 = p2 };
     ATTACH_SERIALIZER(test, Test_serialize);
     ATTACH_DESERIALIZER(test, Test_deserialize);
-    ATTACH_SIZE(test, Test);
+    ATTACH_SIZE(test, GET_SIZE(p1) + GET_SIZE(p2));
 
     return test;
 }
@@ -75,7 +76,8 @@ int main(/*int argc, char* argv[]*/) {
     Buffer buffer = Buffer_create(2048);
 
     Point point = Point_create(123, 213);
-    Test test = Test_create(point);
+    Point point2 = Point_create(233, 221);
+    Test test = Test_create(point, point2);
 
     SERIALIZE(&buffer, test);
 
@@ -83,9 +85,10 @@ int main(/*int argc, char* argv[]*/) {
     fwrite(buffer.raw, sizeof(uint8_t), buffer.size, file);
     fclose(file);
 
-    Test read = Test_create(Point_create(0, 0));
+    Test read = Test_create(Point_create(0, 0), Point_create(0, 0));
     DESERIALIZE(&buffer, 0, read);
     printf("%d %d\n", read.p1.x, read.p1.y);
+    printf("%d %d\n", read.p2.x, read.p2.y);
 
     Buffer_destroy(&buffer);
 
