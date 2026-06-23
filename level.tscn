@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://dgdefelxw4jhd" path="res://player.tscn" id="1_u52ul"]
 [ext_resource type="Texture2D" uid="uid://kj1boxhx58cy" path="res://templategrid_albedo.png" id="1_vonw3"]
+[ext_resource type="Script" uid="uid://dwlrwebbna3nk" path="res://HealthScript.gd" id="3_oi3di"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j3t2j"]
 size = Vector2(100, 100)
@@ -29,6 +30,20 @@ surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D" unique_id=1657217665]
 shape = SubResource("ConcavePolygonShape3D_vonw3")
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1685754565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -0.037651002, 0.0194875)
+mesh = SubResource("PlaneMesh_j3t2j")
+surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D2" unique_id=1209972866]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D2/StaticBody3D" unique_id=2022261386]
+shape = SubResource("ConcavePolygonShape3D_vonw3")
+
 [node name="Player" parent="." unique_id=431479889 instance=ExtResource("1_u52ul")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4291079, -1.0719067)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0019392967, 3.0836148, -1.0722101)
+gravity_scale = 1.15
 linear_damp = 3.0
+
+[node name="Node3D" type="Node3D" parent="Player" unique_id=1395065661]
+script = ExtResource("3_oi3di")
