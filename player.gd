@@ -1,5 +1,7 @@
 extends RigidBody3D
 
+
+
 var mouse_sensitivity := 0.001
 var twist_input := 0.0
 var pitch_input := 0.0
@@ -11,6 +13,17 @@ var DashesLeft = 2
 var  IsDashing = false
 var HasGottenSlowed = false #variable to make shure that the movement speed nerf is only applied once when dashing
 var CanDash = true
+var MaxDashes = 2
+var DashRegen = 3
+
+#variables to make shure that Dash Variables get reset when agility chips are removed
+var DefaultDashSpeed = DashSpeed
+var DefaultMaxDashes
+var DefaultDashRegen = 3
+
+@onready var HealthScript = $Node3D
+@onready var Chips = HealthScript.Chips
+
 @onready var twist_pivot := $TwistPivot
 @onready var pitch_pivot := $TwistPivot/PitchPivot
 
@@ -22,6 +35,8 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if(DashesLeft > MaxDashes):
+		DashesLeft = MaxDashes
 	if(DashesLeft > 0 and !IsDashing):
 		CanDash = true
 	var input := Vector3.ZERO
@@ -65,7 +80,26 @@ func _process(delta: float) -> void:
 	twist_input = 0.0
 	pitch_input = 0.0
 	
+func UpdateDash():
+	MaxDashes = DefaultMaxDashes
+	DashSpeed = DefaultDashSpeed
+	DashRegen = DefaultDashRegen
+	Chips = HealthScript.Chips
+	var AgilityCount = 1
+	for chip in Chips:
+		if(chip == "Agility"):
+			AgilityCount += 1
+	if(AgilityCount == 0):
+		DashSpeed = DefaultDashSpeed
+	for AgilityChips in AgilityCount:
+		DashSpeed+= 200
+	for i in range(0, AgilityCount, 2): #+1 dash per pair
+		MaxDashes =+ 1
+		DashRegen =- 1
+	print(DashSpeed)
+	print(DashRegen)
 	
+			
 func DashCooldown():
 	var current_velocity = linear_velocity
 	CanDash =false
@@ -75,7 +109,7 @@ func DashCooldown():
 	current_velocity.x = 0 #stop sliding after dash
 	current_velocity.z = 0
 	IsDashing = false
-	await get_tree().create_timer(3).timeout
+	await get_tree().create_timer(DashRegen).timeout
 	DashesLeft += 1
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:

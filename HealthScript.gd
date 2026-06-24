@@ -4,8 +4,8 @@ var health = 5;
 var HalfLife = false;
 
 var ChipLoadout = ["Chip:Agility","Chip:percision","Action:Pride:3","Chip:Haste"]
-var Chips = ["Normal","Normal","Normal" ,"Normal" ,"Normal"]
-
+@export var Chips = ["Normal","Normal","Normal" ,"Normal" ,"Normal"]
+@onready var Movement = $".." #Get playercontroller to adjust dashes when using agility
 
 			  
 func _input(event):
@@ -60,8 +60,9 @@ func TakeDamage():
 				Chips[I] = "Empty"
 				health-= 1;
 				I+1;
+	Movement.UpdateDash()
 func Wager(WageredChip):
-	
+
 	var ChipNum = 0
 	var Action = WageredChip.split(":", false, 2)
 	#wagers one of the given chip
@@ -82,4 +83,5 @@ func Wager(WageredChip):
 			
 		if(DiceCount >=int(Action[2])):
 			print("Player uses action ´" + Action[1] + "´")
+	Movement.UpdateDash()
 			
