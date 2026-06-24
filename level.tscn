@@ -14,6 +14,9 @@ uv1_scale = Vector3(20, 20, 20)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_vonw3"]
 data = PackedVector3Array(50, 0, 50, -50, 0, 50, 50, 0, -50, -50, 0, 50, -50, 0, -50, 50, 0, -50)
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_oi3di"]
+rough = true
+
 [node name="Node3D" type="Node3D" unique_id=472994791]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1834569809]
@@ -42,7 +45,8 @@ shape = SubResource("ConcavePolygonShape3D_vonw3")
 
 [node name="Player" parent="." unique_id=431479889 instance=ExtResource("1_u52ul")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0019392967, 3.0836148, -1.0722101)
-gravity_scale = 1.15
+physics_material_override = SubResource("PhysicsMaterial_oi3di")
+gravity_scale = 1.1
 linear_damp = 3.0
 
 [node name="Node3D" type="Node3D" parent="Player" unique_id=1395065661]
