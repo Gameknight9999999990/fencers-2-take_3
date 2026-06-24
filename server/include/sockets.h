@@ -8,6 +8,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <unistd.h>
 
 /**
@@ -65,5 +68,21 @@ char* Server_recv(Server* server, struct sockaddr_in* other, ssize_t* size);
  * @param msg The text to write
  */
 void Server_send(Server* server, struct sockaddr_in* other, const char* msg);
+
+#define MAX_EVENTS 1024
+
+typedef void (*EventCallback)(Server* server, struct sockaddr_in* other, ssize_t* size);
+
+typedef struct EventLoop {
+    int epfd;
+    struct epoll_event events[MAX_EVENTS];
+    EventCallback callback;
+} EventLoop;
+
+EventLoop EventLoop_create(Server* server, EventCallback callback);
+
+void EventLoop_destroy(EventLoop* events);
+
+void EventLoop_read(EventLoop* events, ssize_t* size);
 
 #endif

@@ -438,7 +438,7 @@ typedef struct SerializeBase {
  * @param obj An object to have a serializer attached to
  * @param func A function pointer of type SerializeFunc that is used to serialize the object
  */
-#define ATTACH_SERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.serialize = func
+#define ATTACH_SERIALIZER(obj, func) (obj).SERIALIZER_BASE_NAME.serialize = func
 
 /**
  * @def ATTACH_DESERIALIZER
@@ -449,7 +449,7 @@ typedef struct SerializeBase {
  * @param obj An object to have a deserializer attached to
  * @param func A function pointer of type DeserializeFunc that is used to deserialize the object
  */
-#define ATTACH_DESERIALIZER(obj, func) obj.SERIALIZER_BASE_NAME.deserialize = func
+#define ATTACH_DESERIALIZER(obj, func) (obj).SERIALIZER_BASE_NAME.deserialize = func
 
 /**
  * @def ATTACH_SIZE
@@ -460,7 +460,7 @@ typedef struct SerializeBase {
  * @param obj An object to have its size attached to
  * @param obj_size A sum of all the objects sizes, gotten with sizeof() if it is a primitive, otherwise with GET_SIZE
  */
-#define ATTACH_SIZE(obj, obj_size) obj.SERIALIZER_BASE_NAME.size = (obj_size)
+#define ATTACH_SIZE(obj, obj_size) (obj).SERIALIZER_BASE_NAME.size = (obj_size)
 
 /**
  * @def GET_SIZE
@@ -470,7 +470,7 @@ typedef struct SerializeBase {
  * 
  * @param obj The object to read size from
  */
-#define GET_SIZE(obj) (obj.SERIALIZER_BASE_NAME.size)
+#define GET_SIZE(obj) ((obj).SERIALIZER_BASE_NAME.size)
 
 /**
  * @def SERIALIZE
@@ -483,7 +483,10 @@ typedef struct SerializeBase {
  * @param buffer THe buffer to write to
  * @param obj The object to serialize
  */
-#define SERIALIZE(buffer, obj) obj.SERIALIZER_BASE_NAME.serialize(buffer, (const void*)&obj)
+#define SERIALIZE(buffer, obj) do { \
+    const void* __obj_ptr = (const void*)(&(obj)); \
+    ((SerializeBase*)(__obj_ptr))->serialize(buffer, __obj_ptr); \
+} while (0)
 
 /**
  * @def DESERIALIZE
@@ -497,7 +500,10 @@ typedef struct SerializeBase {
  * @param addr The start address
  * @param obj The object to write to - is not a pointer
  */
-#define DESERIALIZE(buffer, addr, obj) obj.SERIALIZER_BASE_NAME.deserialize(buffer, addr, (void*)&obj)
+#define DESERIALIZE(buffer, addr, obj) do { \
+    void* __obj_ptr = (void*)(&(obj)); \
+    ((SerializeBase*)(__obj_ptr))->deserialize(buffer, addr, __obj_ptr); \
+} while (0)
 
 /**
  * @def FIELD_TYPE_LIST
@@ -562,7 +568,7 @@ typedef struct Field {
  * @param num_fields The amount of fields given
  */
 #define IMPL_SERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, const void* obj) { \
-    for (size_t i = 0; i < num_fields; i++) { \
+    for (size_t i = 0; i < (num_fields); i++) { \
         switch (fields[i].type) { \
             case FIELDTYPE_INT8: \
                 WRITE_8(buffer, *((uint8_t*)((char*)obj + fields[i].offset))); \
@@ -620,7 +626,6 @@ typedef struct Field {
 #define IMPL_DESERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, const size_t addr, void* obj) { \
     size_t curr = addr; \
     for (size_t i = 0; i < num_fields; i++) { \
-        printf("name: %s, type: %d, offset: %ld, addr: %ld\n", #name, fields[i].type, fields[i].offset, curr); \
         switch (fields[i].type) { \
             case FIELDTYPE_INT8: \
                 READ_8(buffer, curr, (uint8_t*)((char*)obj + fields[i].offset)); \
