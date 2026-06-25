@@ -90,6 +90,7 @@ typedef struct SpawnRes {
     OBJECT_SERIALIZABLE
     double x;
     double y;
+    double z;
 } SpawnRes;
 extern Field spawn_res_fields[];
 DECLARE_SERIALIZE_FUNC(SpawnRes_serialize)
@@ -103,6 +104,7 @@ typedef struct Move {
     uint64_t id;
     double dx;
     double dy;
+    double dz;
 } Move;
 extern Field move_fields[];
 DECLARE_SERIALIZE_FUNC(Move_serialize)
@@ -128,6 +130,7 @@ typedef struct Map {
     uint64_t num_players;
     double* xs;
     double* ys;
+    double* zs;
     uint8_t* healths;
 } Map;
 DECLARE_SERIALIZE_FUNC(Map_serialize)

@@ -38,13 +38,13 @@ A request to get a new spawn point: sent by the client. Contains a 64 bit id.
 
 ### Spawn response
 
-A new spawn point for a client: sent by the server. Contains 2 doubles, the x and y position.
+A new spawn point for a client: sent by the server. Contains 2 doubles, the x, y and z position.
 
 ## Controls
 
 ### Move
 
-A message saying a player has moved: sent by the client. Contains a 64 bit id of the player moving, and 2 doubles for the dx and dy.
+A message saying a player has moved: sent by the client. Contains a 64 bit id of the player moving, and 3 doubles for the dx, dy and dz.
 
 ### Attack
 
@@ -54,7 +54,7 @@ A message saying a player has attacked: sent by the client. Contains a 64 bit id
 
 ### Map
 
-A message of every other player in the server: sent by the server. Contains a 64 bit player count, arrays of Xs, Ys, and healths. Xs and Ys are in double form, while health is in 8 bit int form.
+A message of every other player in the server: sent by the server. Contains a 64 bit player count, arrays of Xs, Ys, Zs, and healths. Xs, Ys and Zs are in double form, while health is in 8 bit int form.
 
 ## Leaving
 

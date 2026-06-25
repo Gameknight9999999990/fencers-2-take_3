@@ -109,11 +109,11 @@ Field spawn_req_fields[] = { { FIELDTYPE_INT64, offsetof(SpawnReq, id) } };
 IMPL_SERIALIZE_FUNC(SpawnReq_serialize, spawn_req_fields, sizeof(spawn_req_fields) / sizeof(spawn_req_fields[0]))
 IMPL_DESERIALIZE_FUNC(SpawnReq_deserialize, spawn_req_fields, sizeof(spawn_req_fields) / sizeof(spawn_req_fields[0]))
 
-Field spawn_res_fields[] = { { FIELDTYPE_DOUBLE, offsetof(SpawnRes, x) }, { FIELDTYPE_DOUBLE, offsetof(SpawnRes, y) } };
+Field spawn_res_fields[] = { { FIELDTYPE_DOUBLE, offsetof(SpawnRes, x) }, { FIELDTYPE_DOUBLE, offsetof(SpawnRes, y) }, { FIELDTYPE_DOUBLE, offsetof(SpawnRes, z) } };
 IMPL_SERIALIZE_FUNC(SpawnRes_serialize, spawn_res_fields, sizeof(spawn_res_fields) / sizeof(spawn_res_fields[0]))
 IMPL_DESERIALIZE_FUNC(SpawnRes_deserialize, spawn_res_fields, sizeof(spawn_res_fields) / sizeof(spawn_res_fields[0]))
 
-Field move_fields[] = { { FIELDTYPE_INT64, offsetof(Move, id) }, { FIELDTYPE_DOUBLE, offsetof(Move, dx) }, { FIELDTYPE_DOUBLE, offsetof(Move, dy) } };
+Field move_fields[] = { { FIELDTYPE_INT64, offsetof(Move, id) }, { FIELDTYPE_DOUBLE, offsetof(Move, dx) }, { FIELDTYPE_DOUBLE, offsetof(Move, dy) }, { FIELDTYPE_DOUBLE, offsetof(Move, dz) } };
 IMPL_SERIALIZE_FUNC(Move_serialize, move_fields, sizeof(move_fields) / sizeof(move_fields[0]))
 IMPL_DESERIALIZE_FUNC(Move_deserialize, move_fields, sizeof(move_fields) / sizeof(move_fields[0]))
 
@@ -128,11 +128,8 @@ void Map_serialize(Buffer* buffer, void* obj) {
 
     for (uint64_t i = 0; i < map->num_players; i++) {
         WRITE_DOUBLE(buffer, map->xs[i]);
-    }
-    for (uint64_t i = 0; i < map->num_players; i++) {
         WRITE_DOUBLE(buffer, map->ys[i]);
-    }
-    for (uint64_t i = 0; i < map->num_players; i++) {
+        WRITE_DOUBLE(buffer, map->zs[i]);
         WRITE_8(buffer, map->healths[i]);
     }
 }
@@ -151,23 +148,25 @@ void Map_deserialize(Buffer* buffer, const size_t addr, void* obj) {
     if (map->ys) {
         free(map->ys);
     }
+    if (map->zs) {
+        free(map->zs);
+    }
     if (map->healths) {
         free(map->healths);
     }
 
     map->xs = (double*)malloc(sizeof(double) * map->num_players);
     map->ys = (double*)malloc(sizeof(double) * map->num_players);
+    map->zs = (double*)malloc(sizeof(double) * map->num_players);
     map->healths = (uint8_t*)malloc(sizeof(uint8_t) * map->num_players);
 
     for (uint64_t i = 0; i < map->num_players; i++) {
         READ_DOUBLE(buffer, curr, &map->xs[i]);
         curr += sizeof(double);
-    }
-    for (uint64_t i = 0; i < map->num_players; i++) {
         READ_DOUBLE(buffer, curr, &map->ys[i]);
         curr += sizeof(double);
-    }
-    for (uint64_t i = 0; i < map->num_players; i++) {
+        READ_DOUBLE(buffer, curr, &map->zs[i]);
+        curr += sizeof(double);
         READ_8(buffer, curr, &map->healths[i]);
         curr += sizeof(uint8_t);
     }
