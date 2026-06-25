@@ -8,8 +8,7 @@
 
 #define PROTOCOL_STAGE_LIST(X) \
     X(HANDSHAKE_START) \
-    X(HANDSHAKE_MID_CLIENT) \
-    X(HANDSHAKE_MID_SERVER) \
+    X(HANDSHAKE_MID) \
     X(HANDSHAKE_END) \
     X(SPAWN_REQ) \
     X(SPAWN_RES) \
@@ -49,31 +48,18 @@ DECLARE_DESERIALIZE_FUNC(HandshakeStart_deserialize)
 HandshakeStart HandshakeStart_empty();
 
 #define HANDSHAKE_MID_MAGIC 0x4E43
-// Sent by server
-typedef struct HandshakeMidClient {
+// Sent by server and client
+typedef struct HandshakeMid {
     OBJECT_SERIALIZABLE
     uint16_t magic;
     uint64_t id;
     char name[MAX_NAME_LEN];
-} HandshakeMidClient;
-extern Field handshake_mid_client_fields[];
-DECLARE_SERIALIZE_FUNC(HandshakeMidClient_serialize)
-DECLARE_DESERIALIZE_FUNC(HandshakeMidClient_deserialize)
+} HandshakeMid;
+extern Field handshake_mid_fields[];
+DECLARE_SERIALIZE_FUNC(HandshakeMid_serialize)
+DECLARE_DESERIALIZE_FUNC(HandshakeMid_deserialize)
 
-HandshakeMidClient HandshakeMidClient_empty();
-
-// Sent by client
-typedef struct HandshakeMidServer {
-    OBJECT_SERIALIZABLE
-    uint16_t magic;
-    uint64_t id;
-    char name[MAX_NAME_LEN];
-} HandshakeMidServer;
-extern Field handshake_mid_server_fields[];
-DECLARE_SERIALIZE_FUNC(HandshakeMidServer_serialize)
-DECLARE_DESERIALIZE_FUNC(HandshakeMidServer_deserialize)
-
-HandshakeMidServer HandshakeMidServer_empty();
+HandshakeMid HandshakeMid_empty();
 
 #define HANDSHAKE_END_MAGIC 0x4552
 // Sent by server

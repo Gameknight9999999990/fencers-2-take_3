@@ -12,15 +12,11 @@ void Packet_serialize(Buffer* buffer, void* obj) {
             SERIALIZE(buffer, *start_ptr);
             ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*start_ptr));
             break;
-        case PROTOCOL_HANDSHAKE_MID_CLIENT: ;
-            HandshakeMidClient* client_ptr = (HandshakeMidClient*)packet->next;
+        case PROTOCOL_HANDSHAKE_MID: ;
+            HandshakeMid* client_ptr = (HandshakeMid*)packet->next;
             SERIALIZE(buffer, *client_ptr);
             ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*client_ptr));
             break;
-        case PROTOCOL_HANDSHAKE_MID_SERVER: ;
-            HandshakeMidServer* server_ptr = (HandshakeMidServer*)packet->next;
-            SERIALIZE(buffer, *(HandshakeMidServer*)packet->next);
-            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*server_ptr));
             break;
         case PROTOCOL_HANDSHAKE_END: ;
             HandshakeEnd* end_ptr = (HandshakeEnd*)packet->next;
@@ -70,11 +66,8 @@ void Packet_deserialize(Buffer* buffer, const size_t addr, void* obj) {
         case PROTOCOL_HANDSHAKE_START:
             DESERIALIZE(buffer, curr, *(HandshakeStart*)packet->next);
             break;
-        case PROTOCOL_HANDSHAKE_MID_CLIENT:
-            DESERIALIZE(buffer, curr, *(HandshakeMidClient*)packet->next);
-            break;
-        case PROTOCOL_HANDSHAKE_MID_SERVER:
-            DESERIALIZE(buffer, curr, *(HandshakeMidServer*)packet->next);
+        case PROTOCOL_HANDSHAKE_MID:
+            DESERIALIZE(buffer, curr, *(HandshakeMid*)packet->next);
             break;
         case PROTOCOL_HANDSHAKE_END:
             DESERIALIZE(buffer, curr, *(HandshakeEnd*)packet->next);
@@ -104,13 +97,9 @@ Field handshake_start_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeStart, m
 IMPL_SERIALIZE_FUNC(HandshakeStart_serialize, handshake_start_fields, sizeof(handshake_start_fields) / sizeof(handshake_start_fields[0]))
 IMPL_DESERIALIZE_FUNC(HandshakeStart_deserialize, handshake_start_fields, sizeof(handshake_start_fields) / sizeof(handshake_start_fields[0]))
 
-Field handshake_mid_client_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidClient, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidClient, id) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
-IMPL_SERIALIZE_FUNC(HandshakeMidClient_serialize, handshake_mid_client_fields, sizeof(handshake_mid_client_fields) / sizeof(handshake_mid_client_fields[0]))
-IMPL_DESERIALIZE_FUNC(HandshakeMidClient_deserialize, handshake_mid_client_fields, sizeof(handshake_mid_client_fields) / sizeof(handshake_mid_client_fields[0]))
-
-Field handshake_mid_server_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidServer, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidServer, id) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
-IMPL_SERIALIZE_FUNC(HandshakeMidServer_serialize, handshake_mid_server_fields, sizeof(handshake_mid_server_fields) / sizeof(handshake_mid_server_fields[0]))
-IMPL_DESERIALIZE_FUNC(HandshakeMidServer_deserialize, handshake_mid_server_fields, sizeof(handshake_mid_server_fields) / sizeof(handshake_mid_server_fields[0]))
+Field handshake_mid_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMid, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMid, id) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
+IMPL_SERIALIZE_FUNC(HandshakeMid_serialize, handshake_mid_fields, sizeof(handshake_mid_fields) / sizeof(handshake_mid_fields[0]))
+IMPL_DESERIALIZE_FUNC(HandshakeMid_deserialize, handshake_mid_fields, sizeof(handshake_mid_fields) / sizeof(handshake_mid_fields[0]))
 
 Field handshake_end_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeEnd, magic) }, { FIELDTYPE_INT8, offsetof(HandshakeEnd, confirm) } };
 IMPL_SERIALIZE_FUNC(HandshakeEnd_serialize, handshake_end_fields, sizeof(handshake_end_fields) / sizeof(handshake_end_fields[0]))
@@ -206,22 +195,13 @@ HandshakeStart HandshakeStart_empty() {
     return start;
 }
 
-HandshakeMidClient HandshakeMidClient_empty() {
-    HandshakeMidClient client = {0};
-    ATTACH_SERIALIZER(client, HandshakeMidClient_serialize);
-    ATTACH_DESERIALIZER(client, HandshakeMidClient_deserialize);
+HandshakeMid HandshakeMid_empty() {
+    HandshakeMid client = {0};
+    ATTACH_SERIALIZER(client, HandshakeMid_serialize);
+    ATTACH_DESERIALIZER(client, HandshakeMid_deserialize);
     ATTACH_SIZE(client, sizeof(uint16_t) + sizeof(uint64_t) + (sizeof(char) * MAX_NAME_LEN));
 
     return client;
-}
-
-HandshakeMidServer HandshakeMidServer_empty() {
-    HandshakeMidServer server = {0};
-    ATTACH_SERIALIZER(server, HandshakeMidServer_serialize);
-    ATTACH_DESERIALIZER(server, HandshakeMidServer_deserialize);
-    ATTACH_SIZE(server, sizeof(uint16_t) + sizeof(uint64_t) + (sizeof(char) * MAX_NAME_LEN));
-
-    return server;
 }
 
 HandshakeEnd HandshakeEnd_empty() {
