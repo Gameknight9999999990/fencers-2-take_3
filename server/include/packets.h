@@ -32,15 +32,21 @@ typedef struct Packet {
 DECLARE_SERIALIZE_FUNC(Packet_serialize)
 DECLARE_DESERIALIZE_FUNC(Packet_deserialize)
 
+Packet Packet_empty();
+
+#define MAX_NAME_LEN 64
 #define HANDSHAKE_START_MAGIC 0x4645
 // Sent by client
 typedef struct HandshakeStart {
     OBJECT_SERIALIZABLE
     uint16_t magic;
+    char name[MAX_NAME_LEN];
 } HandshakeStart;
 extern Field handshake_start_fields[];
 DECLARE_SERIALIZE_FUNC(HandshakeStart_serialize)
 DECLARE_DESERIALIZE_FUNC(HandshakeStart_deserialize)
+
+HandshakeStart HandshakeStart_empty();
 
 #define HANDSHAKE_MID_MAGIC 0x4E43
 // Sent by server
@@ -48,20 +54,26 @@ typedef struct HandshakeMidClient {
     OBJECT_SERIALIZABLE
     uint16_t magic;
     uint64_t id;
+    char name[MAX_NAME_LEN];
 } HandshakeMidClient;
 extern Field handshake_mid_client_fields[];
 DECLARE_SERIALIZE_FUNC(HandshakeMidClient_serialize)
 DECLARE_DESERIALIZE_FUNC(HandshakeMidClient_deserialize)
+
+HandshakeMidClient HandshakeMidClient_empty();
 
 // Sent by client
 typedef struct HandshakeMidServer {
     OBJECT_SERIALIZABLE
     uint16_t magic;
     uint64_t id;
+    char name[MAX_NAME_LEN];
 } HandshakeMidServer;
 extern Field handshake_mid_server_fields[];
 DECLARE_SERIALIZE_FUNC(HandshakeMidServer_serialize)
 DECLARE_DESERIALIZE_FUNC(HandshakeMidServer_deserialize)
+
+HandshakeMidServer HandshakeMidServer_empty();
 
 #define HANDSHAKE_END_MAGIC 0x4552
 // Sent by server
@@ -74,6 +86,8 @@ extern Field handshake_end_fields[];
 DECLARE_SERIALIZE_FUNC(HandshakeEnd_serialize)
 DECLARE_DESERIALIZE_FUNC(HandshakeEnd_deserialize)
 
+HandshakeEnd HandshakeEnd_empty();
+
 // Sent by client
 typedef struct SpawnReq {
     OBJECT_SERIALIZABLE
@@ -82,6 +96,8 @@ typedef struct SpawnReq {
 extern Field spawn_req_fields[];
 DECLARE_SERIALIZE_FUNC(SpawnReq_serialize)
 DECLARE_DESERIALIZE_FUNC(SpawnReq_deserialize)
+
+SpawnReq SpawnReq_empty();
 
 // Sent by server
 typedef struct SpawnRes {
@@ -92,6 +108,8 @@ typedef struct SpawnRes {
 extern Field spawn_res_fields[];
 DECLARE_SERIALIZE_FUNC(SpawnRes_serialize)
 DECLARE_DESERIALIZE_FUNC(SpawnRes_deserialize)
+
+SpawnRes SpawnRes_empty();
 
 // Sent by client
 typedef struct Move {
@@ -104,6 +122,8 @@ extern Field move_fields[];
 DECLARE_SERIALIZE_FUNC(Move_serialize)
 DECLARE_DESERIALIZE_FUNC(Move_deserialize)
 
+Move Move_empty();
+
 // Sent by client
 typedef struct Attack {
     OBJECT_SERIALIZABLE
@@ -113,6 +133,8 @@ typedef struct Attack {
 extern Field attack_fields[];
 DECLARE_SERIALIZE_FUNC(Attack_serialize)
 DECLARE_DESERIALIZE_FUNC(Attack_deserialize)
+
+Attack Attack_empty();
 
 // Sent by server
 typedef struct Map {
@@ -125,6 +147,8 @@ typedef struct Map {
 DECLARE_SERIALIZE_FUNC(Map_serialize)
 DECLARE_DESERIALIZE_FUNC(Map_deserialize)
 
+Map Map_empty();
+
 // Sent by client
 typedef struct Disconnect {
     OBJECT_SERIALIZABLE
@@ -133,5 +157,7 @@ typedef struct Disconnect {
 extern Field disconnect_fields[];
 DECLARE_SERIALIZE_FUNC(Disconnect_serialize)
 DECLARE_DESERIALIZE_FUNC(Disconnect_deserialize)
+
+Disconnect Disconnect_empty();
 
 #endif

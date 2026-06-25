@@ -1,40 +1,61 @@
 #include "../include/packets.h"
 
-void Packet_serialize(Buffer* buffer, const void* obj) {
-    const Packet* packet = (const Packet*)obj;
+void Packet_serialize(Buffer* buffer, void* obj) {
+    Packet* packet = (Packet*)obj;
+    ATTACH_SIZE(*packet, sizeof(uint8_t));
 
     WRITE_8(buffer, packet->stage);
 
     switch (packet->stage) {
-        case PROTOCOL_HANDSHAKE_START:
-            SERIALIZE(buffer, *(HandshakeStart*)packet->next);
+        case PROTOCOL_HANDSHAKE_START: ;
+            HandshakeStart* start_ptr = (HandshakeStart*)packet->next;
+            SERIALIZE(buffer, *start_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*start_ptr));
             break;
-        case PROTOCOL_HANDSHAKE_MID_CLIENT:
-            SERIALIZE(buffer, *(HandshakeMidClient*)packet->next);
+        case PROTOCOL_HANDSHAKE_MID_CLIENT: ;
+            HandshakeMidClient* client_ptr = (HandshakeMidClient*)packet->next;
+            SERIALIZE(buffer, *client_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*client_ptr));
             break;
-        case PROTOCOL_HANDSHAKE_MID_SERVER:
+        case PROTOCOL_HANDSHAKE_MID_SERVER: ;
+            HandshakeMidServer* server_ptr = (HandshakeMidServer*)packet->next;
             SERIALIZE(buffer, *(HandshakeMidServer*)packet->next);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*server_ptr));
             break;
-        case PROTOCOL_HANDSHAKE_END:
-            SERIALIZE(buffer, *(HandshakeEnd*)packet->next);
+        case PROTOCOL_HANDSHAKE_END: ;
+            HandshakeEnd* end_ptr = (HandshakeEnd*)packet->next;
+            SERIALIZE(buffer, *end_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*end_ptr));
             break;
-        case PROTOCOL_SPAWN_REQ:
-            SERIALIZE(buffer, *(SpawnReq*)packet->next);
+        case PROTOCOL_SPAWN_REQ: ;
+            SpawnReq* req_ptr = (SpawnReq*)packet->next;
+            SERIALIZE(buffer, *req_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*req_ptr));
             break;
-        case PROTOCOL_SPAWN_RES:
+        case PROTOCOL_SPAWN_RES: ;
+            SpawnRes* res_ptr = (SpawnRes*)packet->next;
             SERIALIZE(buffer, *(SpawnRes*)packet->next);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*res_ptr));
             break;
-        case PROTOCOL_MOVE:
+        case PROTOCOL_MOVE: ;
+            Move* move_ptr = (Move*)packet->next;
             SERIALIZE(buffer, *(Move*)packet->next);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*move_ptr));
             break;
-        case PROTOCOL_ATTACK:
-            SERIALIZE(buffer, *(Attack*)packet->next);
+        case PROTOCOL_ATTACK: ;
+            Attack* attack_ptr = (Attack*)packet->next;
+            SERIALIZE(buffer, *attack_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*attack_ptr));
             break;
-        case PROTOCOL_MAP:
-            SERIALIZE(buffer, *(Map*)packet->next);
+        case PROTOCOL_MAP: ;
+            Map* map_ptr = (Map*)packet->next;
+            SERIALIZE(buffer, *map_ptr);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*map_ptr));
             break;
-        case PROTOCOL_DISCONNECT:
+        case PROTOCOL_DISCONNECT: ;
+            Disconnect* disconnect_ptr = (Disconnect*)packet->next;
             SERIALIZE(buffer, *(Disconnect*)packet->next);
+            ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*disconnect_ptr));
             break;
     }
 }
@@ -79,15 +100,15 @@ void Packet_deserialize(Buffer* buffer, const size_t addr, void* obj) {
     }
 }
 
-Field handshake_start_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeStart, magic) } };
+Field handshake_start_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeStart, magic) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
 IMPL_SERIALIZE_FUNC(HandshakeStart_serialize, handshake_start_fields, sizeof(handshake_start_fields) / sizeof(handshake_start_fields[0]))
 IMPL_DESERIALIZE_FUNC(HandshakeStart_deserialize, handshake_start_fields, sizeof(handshake_start_fields) / sizeof(handshake_start_fields[0]))
 
-Field handshake_mid_client_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidClient, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidClient, id) } };
+Field handshake_mid_client_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidClient, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidClient, id) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
 IMPL_SERIALIZE_FUNC(HandshakeMidClient_serialize, handshake_mid_client_fields, sizeof(handshake_mid_client_fields) / sizeof(handshake_mid_client_fields[0]))
 IMPL_DESERIALIZE_FUNC(HandshakeMidClient_deserialize, handshake_mid_client_fields, sizeof(handshake_mid_client_fields) / sizeof(handshake_mid_client_fields[0]))
 
-Field handshake_mid_server_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidServer, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidServer, id) } };
+Field handshake_mid_server_fields[] = { { FIELDTYPE_INT16, offsetof(HandshakeMidServer, magic) }, { FIELDTYPE_INT64, offsetof(HandshakeMidServer, id) }, { FIELDTYPE_STR, offsetof(HandshakeStart, name) } };
 IMPL_SERIALIZE_FUNC(HandshakeMidServer_serialize, handshake_mid_server_fields, sizeof(handshake_mid_server_fields) / sizeof(handshake_mid_server_fields[0]))
 IMPL_DESERIALIZE_FUNC(HandshakeMidServer_deserialize, handshake_mid_server_fields, sizeof(handshake_mid_server_fields) / sizeof(handshake_mid_server_fields[0]))
 
@@ -111,7 +132,7 @@ Field attack_fields[] = { { FIELDTYPE_INT64, offsetof(Attack, id) }, { FIELDTYPE
 IMPL_SERIALIZE_FUNC(Attack_serialize, attack_fields, sizeof(attack_fields) / sizeof(attack_fields[0]))
 IMPL_DESERIALIZE_FUNC(Attack_deserialize, attack_fields, sizeof(attack_fields) / sizeof(attack_fields[0]))
 
-void Map_serialize(Buffer* buffer, const void* obj) {
+void Map_serialize(Buffer* buffer, void* obj) {
     const Map* map = (const Map*)obj;
 
     WRITE_64(buffer, map->num_players);
@@ -129,6 +150,7 @@ void Map_serialize(Buffer* buffer, const void* obj) {
 
 void Map_deserialize(Buffer* buffer, const size_t addr, void* obj) {
     Map* map = (Map*)obj;
+    ATTACH_SIZE(*map, sizeof(uint64_t) + (sizeof(double) * map->num_players) + (sizeof(double) * map->num_players) + (sizeof(uint8_t) * map->num_players));
     size_t curr = addr;
 
     READ_64(buffer, curr, &map->num_players);
@@ -165,3 +187,102 @@ void Map_deserialize(Buffer* buffer, const size_t addr, void* obj) {
 Field disconnect_fields[] = { { FIELDTYPE_INT64, offsetof(Disconnect, id) } };
 IMPL_SERIALIZE_FUNC(Disconnect_serialize, disconnect_fields, sizeof(disconnect_fields) / sizeof(disconnect_fields[0]))
 IMPL_DESERIALIZE_FUNC(Disconnect_deserialize, disconnect_fields, sizeof(disconnect_fields) / sizeof(disconnect_fields[0]))
+
+Packet Packet_empty() {
+    Packet packet = {0};
+    ATTACH_SERIALIZER(packet, Packet_serialize);
+    ATTACH_DESERIALIZER(packet, Packet_deserialize);
+    // Size will be added later
+
+    return packet;
+}
+
+HandshakeStart HandshakeStart_empty() {
+    HandshakeStart start = {0};
+    ATTACH_SERIALIZER(start, HandshakeStart_serialize);
+    ATTACH_DESERIALIZER(start, HandshakeStart_deserialize);
+    ATTACH_SIZE(start, sizeof(uint16_t) + (sizeof(char) * MAX_NAME_LEN));
+
+    return start;
+}
+
+HandshakeMidClient HandshakeMidClient_empty() {
+    HandshakeMidClient client = {0};
+    ATTACH_SERIALIZER(client, HandshakeMidClient_serialize);
+    ATTACH_DESERIALIZER(client, HandshakeMidClient_deserialize);
+    ATTACH_SIZE(client, sizeof(uint16_t) + sizeof(uint64_t) + (sizeof(char) * MAX_NAME_LEN));
+
+    return client;
+}
+
+HandshakeMidServer HandshakeMidServer_empty() {
+    HandshakeMidServer server = {0};
+    ATTACH_SERIALIZER(server, HandshakeMidServer_serialize);
+    ATTACH_DESERIALIZER(server, HandshakeMidServer_deserialize);
+    ATTACH_SIZE(server, sizeof(uint16_t) + sizeof(uint64_t) + (sizeof(char) * MAX_NAME_LEN));
+
+    return server;
+}
+
+HandshakeEnd HandshakeEnd_empty() {
+    HandshakeEnd end = {0};
+    ATTACH_SERIALIZER(end, HandshakeEnd_serialize);
+    ATTACH_DESERIALIZER(end, HandshakeEnd_deserialize);
+    ATTACH_SIZE(end, sizeof(uint16_t) + sizeof(uint8_t));
+
+    return end;
+}
+
+SpawnReq SpawnReq_empty() {
+    SpawnReq req = {0};
+    ATTACH_SERIALIZER(req, SpawnReq_serialize);
+    ATTACH_DESERIALIZER(req, SpawnReq_deserialize);
+    ATTACH_SIZE(req, sizeof(uint64_t));
+
+    return req;
+}
+
+SpawnRes SpawnRes_empty() {
+    SpawnRes res = {0};
+    ATTACH_SERIALIZER(res, SpawnRes_serialize);
+    ATTACH_DESERIALIZER(res, SpawnRes_deserialize);
+    ATTACH_SIZE(res, sizeof(double) + sizeof(double));
+
+    return res;
+}
+
+Move Move_empty() {
+    Move move = {0};
+    ATTACH_SERIALIZER(move, Move_serialize);
+    ATTACH_DESERIALIZER(move, Move_deserialize);
+    ATTACH_SIZE(move, sizeof(uint64_t) + sizeof(double) + sizeof(double));
+
+    return move;
+}
+
+Attack Attack_empty() {
+    Attack attack = {0};
+    ATTACH_SERIALIZER(attack, Attack_serialize);
+    ATTACH_DESERIALIZER(attack, Attack_deserialize);
+    ATTACH_SIZE(attack, sizeof(uint64_t) + sizeof(uint8_t));
+
+    return attack;
+}
+
+Map Map_empty() {
+    Map map = {0};
+    ATTACH_SERIALIZER(map, Map_serialize);
+    ATTACH_DESERIALIZER(map, Map_deserialize);
+    // Size will be added later
+
+    return map;
+}
+
+Disconnect Disconnect_empty() {
+    Disconnect disconnect = {0};
+    ATTACH_SERIALIZER(disconnect, Disconnect_serialize);
+    ATTACH_DESERIALIZER(disconnect, Disconnect_deserialize);
+    ATTACH_SIZE(disconnect, sizeof(uint64_t));
+
+    return disconnect;
+}

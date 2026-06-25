@@ -391,7 +391,7 @@ void Buffer_destroy(Buffer* buffer);
  * @param buffer The buffer to write to
  * @param obj A void* of the object being serialized
  */
-typedef void (*SerializeFunc)(Buffer* buffer, const void* obj);
+typedef void (*SerializeFunc)(Buffer* buffer, void* obj);
 
 /**
  * @typedef DeserializeFunc
@@ -484,7 +484,7 @@ typedef struct SerializeBase {
  * @param obj The object to serialize
  */
 #define SERIALIZE(buffer, obj) do { \
-    const void* __obj_ptr = (const void*)(&(obj)); \
+    void* __obj_ptr = (void*)(&(obj)); \
     ((SerializeBase*)(__obj_ptr))->serialize(buffer, __obj_ptr); \
 } while (0)
 
@@ -555,7 +555,7 @@ typedef struct Field {
  * 
  * @param name The name of the function to declare
  */
-#define DECLARE_SERIALIZE_FUNC(name) void name(Buffer* buffer, const void* obj);
+#define DECLARE_SERIALIZE_FUNC(name) void name(Buffer* buffer, void* obj);
 
 /**
  * @def IMPL_SERIALIZE_FUNC
@@ -567,7 +567,7 @@ typedef struct Field {
  * @param fields An array of fields describing a struct
  * @param num_fields The amount of fields given
  */
-#define IMPL_SERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, const void* obj) { \
+#define IMPL_SERIALIZE_FUNC(name, fields, num_fields) void name(Buffer* buffer, void* obj) { \
     for (size_t i = 0; i < (num_fields); i++) { \
         switch (fields[i].type) { \
             case FIELDTYPE_INT8: \
