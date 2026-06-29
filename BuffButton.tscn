@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c6j72pfgp46hu"]
+
+[ext_resource type="Script" uid="uid://bbe5xbhymsums" path="res://BuffButton.gd" id="1_cwima"]
+
+[node name="Button" type="Button" unique_id=657933670]
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_cwima")

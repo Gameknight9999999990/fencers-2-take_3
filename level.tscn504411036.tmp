@@ -55,12 +55,11 @@ linear_damp = 3.0
 [node name="Health" type="Node3D" parent="Player" unique_id=1395065661]
 script = ExtResource("3_oi3di")
 
-[node name="MenuController" type="Node3D" parent="." unique_id=782864707 node_paths=PackedStringArray("menu")]
+[node name="MenuController" type="Node3D" parent="." unique_id=782864707 node_paths=PackedStringArray("Menu")]
 script = ExtResource("4_1ainy")
-menu = NodePath("../ButtonMenu")
+Menu = NodePath("../ButtonMenu")
 
 [node name="ButtonMenu" type="Node2D" parent="." unique_id=1192688017 node_paths=PackedStringArray("Hp")]
-visible = false
 position = Vector2(1385, 642)
 scale = Vector2(5.2292347, 5.311226)
 script = ExtResource("4_0b4ue")

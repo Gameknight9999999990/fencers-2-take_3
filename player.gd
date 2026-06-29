@@ -7,21 +7,21 @@ var twist_input := 0.0
 var pitch_input := 0.0
 var move_speed := 2400.0
 var dashDir = Vector3()
-var DashTime = 0.3
-var DashSpeed = 4850
+var DashTime = 0.35
+var DashSpeed = 4550
 var DashesLeft = 2
 var  IsDashing = false
 var HasGottenSlowed = false #variable to make shure that the movement speed nerf is only applied once when dashing
 var CanDash = true
 var MaxDashes = 2
-var DashRegen = 3
+var DashRegen = 5
 
 #variables to make shure that Dash Variables get reset when agility chips are removed
 var DefaultDashSpeed = DashSpeed
-var DefaultMaxDashes
-var DefaultDashRegen = 3
+var DefaultMaxDashes = MaxDashes
+var DefaultDashRegen = 5
 
-@onready var HealthScript = $Node3D
+@onready var HealthScript = $Health
 @onready var Chips = HealthScript.Chips
 
 @onready var twist_pivot := $TwistPivot
@@ -96,8 +96,6 @@ func UpdateDash():
 	for i in range(0, AgilityCount, 2): #+1 dash per pair
 		MaxDashes =+ 1
 		DashRegen =- 1
-	print(DashSpeed)
-	print(DashRegen)
 	
 			
 func DashCooldown():
