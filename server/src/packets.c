@@ -53,6 +53,8 @@ void Packet_serialize(Buffer* buffer, void* obj) {
             SERIALIZE(buffer, *(Disconnect*)packet->next);
             ATTACH_SIZE(*packet, GET_SIZE(*packet) + GET_SIZE(*disconnect_ptr));
             break;
+        default:
+            break;
     }
 }
 
@@ -89,6 +91,8 @@ void Packet_deserialize(Buffer* buffer, const size_t addr, void* obj) {
             break;
         case PROTOCOL_DISCONNECT:
             DESERIALIZE(buffer, curr, *(Disconnect*)packet->next);
+            break;
+        default:
             break;
     }
 }
@@ -131,6 +135,7 @@ void Map_serialize(Buffer* buffer, void* obj) {
         WRITE_DOUBLE(buffer, map->ys[i]);
         WRITE_DOUBLE(buffer, map->zs[i]);
         WRITE_8(buffer, map->healths[i]);
+        WRITE_STR(buffer, map->names[i]);
     }
 }
 
@@ -154,11 +159,15 @@ void Map_deserialize(Buffer* buffer, const size_t addr, void* obj) {
     if (map->healths) {
         free(map->healths);
     }
+    if (map->names) {
+        free(map->names);
+    }
 
     map->xs = (double*)malloc(sizeof(double) * map->num_players);
     map->ys = (double*)malloc(sizeof(double) * map->num_players);
     map->zs = (double*)malloc(sizeof(double) * map->num_players);
     map->healths = (uint8_t*)malloc(sizeof(uint8_t) * map->num_players);
+    map->names = malloc(map->num_players * sizeof(*map->names));
 
     for (uint64_t i = 0; i < map->num_players; i++) {
         READ_DOUBLE(buffer, curr, &map->xs[i]);
@@ -169,6 +178,8 @@ void Map_deserialize(Buffer* buffer, const size_t addr, void* obj) {
         curr += sizeof(double);
         READ_8(buffer, curr, &map->healths[i]);
         curr += sizeof(uint8_t);
+        READ_STR(buffer, curr, map->names[i]);
+        curr += sizeof(map->names[i]);
     }
 }
 
@@ -265,3 +276,99 @@ Disconnect Disconnect_empty() {
 
     return disconnect;
 }
+
+bool handle_handshake_start(Packet* packet, Map* map) {
+    HandshakeStart* start = (HandshakeStart*)packet->next;
+
+    if (start->magic != HANDSHAKE_START_MAGIC) {
+        return false;
+    }
+
+    uint64_t id = map->num_players++;
+    strcpy(map->names[id], start->name);
+
+    HandshakeMid* mid = (HandshakeMid*)malloc(sizeof(HandshakeMid));
+    *mid = HandshakeMid_empty();
+    mid->magic = HANDSHAKE_MID_MAGIC;
+    mid->id = id;
+    strcpy(mid->name, map->names[id]);
+
+    packet->stage = PROTOCOL_HANDSHAKE_MID;
+    packet->next = (void*)mid;
+
+    return true;
+}
+
+bool handle_handshake_mid(Packet* packet) {
+    HandshakeMid* mid = (HandshakeMid*)packet->next;
+
+    if (mid->magic != HANDSHAKE_MID_MAGIC) {
+        return false;
+    }
+
+    HandshakeEnd* end = (HandshakeEnd*)malloc(sizeof(HandshakeEnd));
+    *end = HandshakeEnd_empty();
+    end->magic = HANDSHAKE_END_MAGIC;
+    end->confirm = true;
+
+    packet->stage = PROTOCOL_HANDSHAKE_END;
+    packet->next = (void*)end;
+
+    return true;
+}
+
+void handle_spawn_req(Packet* packet) {
+    SpawnReq* req = (SpawnReq*)packet->next;
+    (void)req;
+
+    SpawnRes* res = (SpawnRes*)malloc(sizeof(SpawnRes));
+    *res = SpawnRes_empty();
+    res->x = 0;
+    res->y = 0;
+    res->z = 0;
+    
+    packet->stage = PROTOCOL_SPAWN_RES;
+    packet->next = (void*)res;
+}
+
+void handle_move(Packet* packet) {
+    Move* move = (Move*)packet->next;
+    (void)move;
+
+    packet->stage = PROTOCOL_NONE;
+    packet->next = NULL;
+}
+
+void handle_packet(UDPServer* UDPServer, struct sockaddr_in* other, ssize_t* size) {
+    uint8_t* msg = (uint8_t*)UDPServer_recv(UDPServer, other, size);
+    Buffer buffer = { .size = *size, .cap = *size, .raw = msg };
+
+    Packet packet = Packet_empty();
+    DESERIALIZE(&buffer, 0, packet);
+
+    buffer.size = 0;
+    memset(buffer.raw, 0, buffer.size);
+
+    switch (packet.stage) {
+        case PROTOCOL_HANDSHAKE_START:
+            handle_handshake_start(&packet, &map);
+            break;
+        case PROTOCOL_HANDSHAKE_MID:
+            handle_handshake_mid(&packet);
+            break;
+        default:
+            break;
+    }
+
+    SERIALIZE(&buffer, packet);
+
+    UDPServer_send(UDPServer, other, (char*)buffer.raw);
+
+    if (packet.next) {
+        free(packet.next);
+    }
+
+    Buffer_destroy(&buffer);
+}
+
+Map map = { .num_players = 0, .xs = NULL, .ys = NULL, .zs = NULL, .healths = NULL, .names = NULL };

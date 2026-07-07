@@ -15,7 +15,8 @@
     X(MOVE) \
     X(ATTACK) \
     X(MAP) \
-    X(DISCONNECT)
+    X(DISCONNECT) \
+    X(NONE)
 
 typedef enum ProtocolStage {
     #define X(name) PROTOCOL_##name,
@@ -48,7 +49,7 @@ DECLARE_DESERIALIZE_FUNC(HandshakeStart_deserialize)
 HandshakeStart HandshakeStart_empty();
 
 #define HANDSHAKE_MID_MAGIC 0x4E43
-// Sent by server and client
+// Sent by UDPServer and client
 typedef struct HandshakeMid {
     OBJECT_SERIALIZABLE
     uint16_t magic;
@@ -62,7 +63,7 @@ DECLARE_DESERIALIZE_FUNC(HandshakeMid_deserialize)
 HandshakeMid HandshakeMid_empty();
 
 #define HANDSHAKE_END_MAGIC 0x4552
-// Sent by server
+// Sent by UDPServer
 typedef struct HandshakeEnd {
     OBJECT_SERIALIZABLE
     uint16_t magic;
@@ -85,7 +86,7 @@ DECLARE_DESERIALIZE_FUNC(SpawnReq_deserialize)
 
 SpawnReq SpawnReq_empty();
 
-// Sent by server
+// Sent by UDPServer
 typedef struct SpawnRes {
     OBJECT_SERIALIZABLE
     double x;
@@ -124,7 +125,7 @@ DECLARE_DESERIALIZE_FUNC(Attack_deserialize)
 
 Attack Attack_empty();
 
-// Sent by server
+// Sent by UDPServer
 typedef struct Map {
     OBJECT_SERIALIZABLE
     uint64_t num_players;
@@ -132,6 +133,7 @@ typedef struct Map {
     double* ys;
     double* zs;
     uint8_t* healths;
+    char (*names)[MAX_NAME_LEN];
 } Map;
 DECLARE_SERIALIZE_FUNC(Map_serialize)
 DECLARE_DESERIALIZE_FUNC(Map_deserialize)
@@ -148,5 +150,17 @@ DECLARE_SERIALIZE_FUNC(Disconnect_serialize)
 DECLARE_DESERIALIZE_FUNC(Disconnect_deserialize)
 
 Disconnect Disconnect_empty();
+
+bool handle_handshake_start(Packet* packet, Map* map);
+
+bool handle_handshake_mid(Packet* packet);
+
+void handle_spawn_req(Packet* packet);
+
+void handle_move(Packet* packet);
+
+extern Map map;
+
+void handle_packet(UDPServer* UDPServer, struct sockaddr_in* other, ssize_t* size);
 
 #endif

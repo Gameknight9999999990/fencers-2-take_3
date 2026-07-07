@@ -54,7 +54,7 @@ A message saying a player has attacked: sent by the client. Contains a 64 bit id
 
 ### Map
 
-A message of every other player in the server: sent by the server. Contains a 64 bit player count, arrays of Xs, Ys, Zs, and healths. Xs, Ys and Zs are in double form, while health is in 8 bit int form.
+A message of every other player in the server: sent by the server. Contains a 64 bit player count, arrays of Xs, Ys, Zs, healths and names. Xs, Ys and Zs are in double form, health is in 8 bit int form and names are in a char* form.
 
 ## Leaving
 

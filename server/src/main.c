@@ -50,12 +50,47 @@ void handle_int(int sig) {
     stop = true;
 }
 
-void callback(Server* server, struct sockaddr_in* other, ssize_t* size) {
-    char* msg = Server_recv(server, other, size);
+void callback(UDPServer* server, struct sockaddr_in* other, ssize_t* size) {
+    char* msg = UDPServer_recv(server, other, size);
 
-    Server_send(server, other, msg);
+    UDPServer_send(server, other, msg);
 
     free(msg);
+}
+
+void accept_callback(TCPServer* server, int epfd) {
+    int fd = accept(server->fd, NULL, NULL);
+
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+    TCPCon* con = malloc(sizeof(TCPCon));
+    con->base.type = EVENT_CLIENT;
+    con->fd = fd;
+    con->data = NULL;
+
+    struct epoll_event ev = { .events = EPOLLIN, .data.ptr = con };
+
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
+}
+
+void recv_callback(TCPCon* con, ssize_t* size, int epfd) {
+    (void)size;
+    char buf[1024];
+    ssize_t n = recv(con->fd, buf, sizeof(buf), 0);
+
+    if (n > 0) {
+        send(con->fd, buf, n, 0);
+    } else if (n == 0) {
+        epoll_ctl(epfd, EPOLL_CTL_DEL, con->fd, NULL);
+        close(con->fd);
+        free(con);
+    } else {
+        perror("recv");
+        epoll_ctl(epfd, EPOLL_CTL_DEL, con->fd, NULL);
+        close(con->fd);
+        free(con);
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -66,20 +101,20 @@ int main(int argc, char* argv[]) {
 
     signal(SIGINT, handle_int);
 
-    Server server = Server_start(atoi(argv[1]));
+    TCPServer server = TCPServer_start(atoi(argv[1]));
     if (server.fd < 0) {
         return -1;
     }
 
-    EventLoop loop = EventLoop_create(&server, callback);
+    TCPEventLoop loop = TCPEventLoop_create(&server, accept_callback, recv_callback);
     
     while (!stop) {
         ssize_t size = 2048;
         
-        EventLoop_read(&loop, &size);
+        TCPEventLoop_read(&loop, &size);
     }
 
-    Server_stop(&server);
+    TCPServer_stop(&server);
 
     Buffer buffer = Buffer_create(2048);
 
