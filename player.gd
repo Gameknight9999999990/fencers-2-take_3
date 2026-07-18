@@ -5,10 +5,10 @@ extends RigidBody3D
 var mouse_sensitivity := 0.001
 var twist_input := 0.0
 var pitch_input := 0.0
-var move_speed := 2400.0
+var move_speed := 40
 var dashDir = Vector3()
-var DashTime = 0.35
-var DashSpeed = 4550
+var DashTime = 0.38
+var DashSpeed = 90
 var DashesLeft = 2
 var  IsDashing = false
 var HasGottenSlowed = false #variable to make shure that the movement speed nerf is only applied once when dashing
@@ -19,11 +19,11 @@ var DashRegen = 5
 #variables to make shure that Dash Variables get reset when agility chips are removed
 var DefaultDashSpeed = DashSpeed
 var DefaultMaxDashes = MaxDashes
-var DefaultDashRegen = 5
+var DefaultDashRegen = DashRegen
 
 @onready var HealthScript = $Health
 @onready var Chips = HealthScript.Chips
-
+@onready var AttackScript  = $Node3D
 @onready var twist_pivot := $TwistPivot
 @onready var pitch_pivot := $TwistPivot/PitchPivot
 
@@ -44,9 +44,8 @@ func _process(delta: float) -> void:
 		input.x = Input.get_axis("straif_left", "straif_right")
 
 		input.z = Input.get_axis("move_forward", "Move_Back")
-	
 	#make the player slower while dashing so they dont have as much control
-	if(IsDashing):
+	if(IsDashing or AttackScript.IsAttacking):
 		if(!HasGottenSlowed):
 			HasGottenSlowed = true
 			move_speed = move_speed / 5
@@ -61,24 +60,23 @@ func _process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("Dash") and CanDash:
 		IsDashing = true
-		DashCooldown()	
+		DashCooldown()
 		dashDir = input
 	var move_dirDash : Vector3 = (forward * -dashDir.z + right * dashDir.x).normalized()
 	if(IsDashing):
-		apply_central_force(move_dirDash * DashSpeed * delta)
-	
-	
+		apply_central_force(move_dirDash * DashSpeed)
 	if move_dir != Vector3.ZERO:
-		apply_central_force(move_dir * move_speed * delta)
+		apply_central_force(move_dir * move_speed)
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		
-	twist_pivot.rotate_y(twist_input)
+	
 	pitch_pivot.rotate_x(pitch_input)
 	pitch_pivot.rotation.x = clamp(pitch_pivot.rotation.x, -1.5, 1.5)
 	twist_input = 0.0
 	pitch_input = 0.0
+
 	
 func UpdateDash():
 	MaxDashes = DefaultMaxDashes
@@ -114,3 +112,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			twist_input = - event.relative.x * mouse_sensitivity
 			pitch_input = - event.relative.y * mouse_sensitivity
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void: # i stole this codea
+	var camera = get_viewport().get_camera_3d()
+	rotate_y(twist_input)
+	if camera != null:
+		var current_transform = state.transform
+		var camera_y_rotation = camera.global_rotation.y
+		current_transform.basis = Basis(Vector3.UP, camera_y_rotation)
+		state.transform = current_transform
