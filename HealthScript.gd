@@ -2,11 +2,11 @@ extends Node
 
 var health = 5;
 var HalfLife = false;
-
+@export var IsDummy = false
 var ChipLoadout = ["Chip:Agility","Chip:percision","Action:Pride:3","Chip:Haste"]
 @export var Chips = ["Normal","Normal","Normal" ,"Normal" ,"Normal"]
 @onready var Movement = $".." #Get playercontroller to adjust dashes when using agility
-
+var Invounerable = false
 			  
 func _input(event):
 	if(event.is_action_released("DamagePlayer")):
@@ -41,6 +41,8 @@ func Remove1Stock():
 		print("the player is dead")
 #damage the player 
 func TakeDamage():
+	if(Invounerable):
+		return
 	print("Ow")
 	var I = 0;
 	
@@ -60,9 +62,11 @@ func TakeDamage():
 				Chips[I] = "Empty"
 				health-= 1;
 				I+1;
-	Movement.UpdateDash()
+	if(!IsDummy):
+		Movement.UpdateDash()
 func Wager(WageredChip):
-
+	if(IsDummy):
+		return
 	var ChipNum = 0
 	var Action = WageredChip.split(":", false, 2)
 	#wagers one of the given chip
