@@ -1,12 +1,16 @@
 extends Node
-
+@export var Dice = 0;
 var health = 5;
 var HalfLife = false;
 @export var IsDummy = false
+@onready var Attack  = $"../Node3D"
 var ChipLoadout = ["Chip:Agility","Chip:percision","Action:Pride:3","Chip:Haste"]
 @export var Chips = ["Normal","Normal","Normal" ,"Normal" ,"Normal"]
 @onready var Movement = $".." #Get playercontroller to adjust dashes when using agility
 var Invounerable = false
+
+
+
 			  
 func _input(event):
 	if(event.is_action_released("DamagePlayer")):
@@ -25,6 +29,8 @@ func _ready():
 	print("the game has started")
 
 func _process(delta: float) -> void:
+		
+			
 	if (health <= 0):
 			Remove1Stock()
 
@@ -39,8 +45,12 @@ func Remove1Stock():
 	else:
 		#die
 		print("the player is dead")
+		
+	
+		
 #damage the player 
 func TakeDamage():
+	Dice = 0;
 	if(Invounerable):
 		return
 	print("Ow")
@@ -64,9 +74,21 @@ func TakeDamage():
 				I+1;
 	if(!IsDummy):
 		Movement.UpdateDash()
+		Attack.UpdateChips()
 func Wager(WageredChip):
+	var ChipCount = 0
+	for Chip in Chips:
+		if(Chip != "Normal"):
+			ChipCount = ChipCount +1
+	if(ChipCount >= 5 and WageredChip.split(":")[0] == "Chip"):
+		return
+	
 	if(IsDummy):
 		return
+	print(Dice)
+	Dice = Dice +1
+	print(Dice)
+		
 	var ChipNum = 0
 	var Action = WageredChip.split(":", false, 2)
 	#wagers one of the given chip
@@ -80,12 +102,8 @@ func Wager(WageredChip):
 				ChipNum += 1; 
 				break
 	else: #do actions like pride 
-		var DiceCount = 0
-		for Chip in Chips:
-			if(Chip != "Normal" and Chip != "Empty"):
-				DiceCount += 1
-			
-		if(DiceCount >=int(Action[2])):
-			print("Player uses action ´" + Action[1] + "´")
+		if(Dice >=int(Action[1])):
+			Attack.DoAttack(0, Action[1])
 	Movement.UpdateDash()
+	Attack.UpdateChips()
 			

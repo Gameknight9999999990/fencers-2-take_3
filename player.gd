@@ -14,13 +14,13 @@ var  IsDashing = false
 var HasGottenSlowed = false #variable to make shure that the movement speed nerf is only applied once when dashing
 var CanDash = true
 var MaxDashes = 2
-var DashRegen = 5
+var DashRegen = 4
+
 
 #variables to make shure that Dash Variables get reset when agility chips are removed
-var DefaultDashSpeed = DashSpeed
-var DefaultMaxDashes = MaxDashes
-var DefaultDashRegen = DashRegen
-
+var DefaultDashSpeed = 90
+var DefaultMaxDashes = 2
+var DefaultDashRegen = 4;
 @onready var HealthScript = $Health
 @onready var Chips = HealthScript.Chips
 @onready var AttackScript  = $Node3D
@@ -35,6 +35,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+
 	if(DashesLeft > MaxDashes):
 		DashesLeft = MaxDashes
 	if(DashesLeft > 0 and !IsDashing):
@@ -48,12 +49,12 @@ func _process(delta: float) -> void:
 	if(IsDashing or AttackScript.IsAttacking):
 		if(!HasGottenSlowed):
 			HasGottenSlowed = true
-			move_speed = move_speed / 5
+			move_speed = 10
 	else:
 		if(HasGottenSlowed):
 			HasGottenSlowed = false
 			await get_tree().create_timer(0.2).timeout #keep the player slowed for a short while so the dash needs to be used more strategicly
-			move_speed = move_speed * 5
+			move_speed = 40
 	var forward = -twist_pivot.global_transform.basis.z
 	var right = twist_pivot.global_transform.basis.x
 	var move_dir : Vector3 = (forward * -input.z + right * input.x).normalized()
@@ -79,22 +80,24 @@ func _process(delta: float) -> void:
 
 	
 func UpdateDash():
-	MaxDashes = DefaultMaxDashes
-	DashSpeed = DefaultDashSpeed
-	DashRegen = DefaultDashRegen
+
 	Chips = HealthScript.Chips
 	var AgilityCount = 1
 	for chip in Chips:
 		if(chip == "Agility"):
 			AgilityCount += 1
 	if(AgilityCount == 0):
+		MaxDashes = DefaultMaxDashes
 		DashSpeed = DefaultDashSpeed
+		DashRegen = DefaultDashRegen
+		DashSpeed = DefaultDashSpeed
+		return
 	for AgilityChips in AgilityCount:
-		DashSpeed+= 200
+		DashSpeed+= 2
 	for i in range(0, AgilityCount, 2): #+1 dash per pair
-		MaxDashes =+ 1
-		DashRegen =- 1
-	
+		MaxDashes = MaxDashes +1;
+		DashRegen = DashRegen - 0.4	
+
 			
 func DashCooldown():
 	var current_velocity = linear_velocity
