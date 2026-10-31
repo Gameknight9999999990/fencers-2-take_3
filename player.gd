@@ -16,6 +16,8 @@ var CanDash = true
 var MaxDashes = 2
 var DashRegen = 4
 
+@onready var camera = $TwistPivot/PitchPivot/Camera3D
+
 
 #variables to make shure that Dash Variables get reset when agility chips are removed
 var DefaultDashSpeed = 90
@@ -30,12 +32,17 @@ var DefaultDashRegen = 4;
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	if is_multiplayer_authority():
+		camera.current = true
+	else:
+		camera.current = false
 	
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-
+	if(!is_multiplayer_authority()):
+		return
 	if(DashesLeft > MaxDashes):
 		DashesLeft = MaxDashes
 	if(DashesLeft > 0 and !IsDashing):
@@ -116,7 +123,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			twist_input = - event.relative.x * mouse_sensitivity
 			pitch_input = - event.relative.y * mouse_sensitivity
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void: # i stole this codea
-	var camera = get_viewport().get_camera_3d()
+	
 	rotate_y(twist_input)
 	if camera != null:
 		var current_transform = state.transform

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Fencers 2"
-run/main_scene="uid://bwj3xaqhbubv3"
+run/main_scene="uid://dsg17sks6ijkl"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 

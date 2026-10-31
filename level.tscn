@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://bwj3xaqhbubv3"]
 
-[ext_resource type="PackedScene" uid="uid://dgdefelxw4jhd" path="res://player.tscn" id="1_u52ul"]
 [ext_resource type="Texture2D" uid="uid://kj1boxhx58cy" path="res://templategrid_albedo.png" id="1_vonw3"]
 [ext_resource type="ArrayMesh" uid="uid://bnn1lcpvokgx8" path="res://legacymap.obj" id="2_n6hdu"]
-[ext_resource type="Script" uid="uid://dwlrwebbna3nk" path="res://HealthScript.gd" id="3_oi3di"]
 [ext_resource type="Script" uid="uid://7dcy7jttkwap" path="res://BuffData.gd" id="4_0b4ue"]
 [ext_resource type="Script" uid="uid://pgeygjntho4q" path="res://MenuToggle.gd" id="4_1ainy"]
 [ext_resource type="Script" uid="uid://bbe5xbhymsums" path="res://BuffButton.gd" id="5_f2txt"]
-[ext_resource type="Script" uid="uid://cqx4h5xeusbb6" path="res://Attack.gd" id="5_km5ld"]
-[ext_resource type="PackedScene" uid="uid://csifld6baybfh" path="res://Enemy.tscn" id="9_i2t4f"]
+[ext_resource type="Script" uid="uid://dir865rsk1jpx" path="res://Multiplayer_Spawner.gd" id="6_1ainy"]
+[ext_resource type="PackedScene" uid="uid://dgdefelxw4jhd" path="res://player.tscn" id="7_n6hdu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_km5ld"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_j3t2j"]
 size = Vector2(100, 100)
@@ -20,19 +20,46 @@ uv1_scale = Vector3(20, 20, 20)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_vonw3"]
 data = PackedVector3Array(50, 0, 50, -50, 0, 50, 50, 0, -50, -50, 0, 50, -50, 0, -50, 50, 0, -50)
 
-[sub_resource type="BoxMesh" id="BoxMesh_km5ld"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_8cye3"]
-size = Vector3(1, 1, 1.8122559)
-
 [node name="Node3D" type="Node3D" unique_id=472994791]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1834569809]
-transform = Transform3D(-0.8660254, -0.43301278, 0.24999999, -0.222568, 0.7815834, 0.58274424, -0.44773152, 0.44902927, -0.77324593, 0, 1.4019676, -3.2087622)
+transform = Transform3D(-0.8660254, -0.43301275, 0.25, -0.222568, 0.7815834, 0.58274424, -0.44773152, 0.44902927, -0.77324593, 0, -7.711489, -3.2087622)
 shadow_enabled = true
 
+[node name="Row of cubes(trademark)" type="MeshInstance3D" parent="." unique_id=1945763015]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.69012046, -8.604269, -5.5912275)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=2049934631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.0083194)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=2111107521]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.9661875)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=245030811]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.9526682)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=323250293]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.949047)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D8" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=1744661686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.946557)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=310008409]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.9492645)
+mesh = SubResource("BoxMesh_km5ld")
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=385393608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.946889)
+mesh = SubResource("BoxMesh_km5ld")
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1901734213]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -0.037651002, 0.0194875)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -9.151108, 0.0194875)
 mesh = SubResource("PlaneMesh_j3t2j")
 surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 
@@ -42,7 +69,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 shape = SubResource("ConcavePolygonShape3D_vonw3")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1685754565]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -0.037651002, 0.0194875)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011471748, -9.151108, 0.0194875)
 mesh = ExtResource("2_n6hdu")
 surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 
@@ -51,21 +78,16 @@ surface_material_override/0 = SubResource("StandardMaterial3D_fvrn3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D2/StaticBody3D" unique_id=2022261386]
 shape = SubResource("ConcavePolygonShape3D_vonw3")
 
-[node name="Player" parent="." unique_id=431479889 instance=ExtResource("1_u52ul")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3533711, 0)
-gravity_scale = 1.1
-linear_damp = 3.0
-
 [node name="MenuController" type="Node3D" parent="." unique_id=782864707 node_paths=PackedStringArray("menu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.113457, 0)
 script = ExtResource("4_1ainy")
 menu = NodePath("../ButtonMenu")
 
-[node name="ButtonMenu" type="Node2D" parent="." unique_id=1192688017 node_paths=PackedStringArray("Hp")]
+[node name="ButtonMenu" type="Node2D" parent="." unique_id=1192688017]
 visible = false
 position = Vector2(1385, 642)
 scale = Vector2(5.2292347, 5.311226)
 script = ExtResource("4_0b4ue")
-Hp = NodePath("../Player/Health")
 
 [node name="Button" type="Button" parent="ButtonMenu" unique_id=1261696650]
 offset_left = 18.0
@@ -178,69 +200,12 @@ text = "Pride"
 script = ExtResource("5_f2txt")
 metadata/_edit_use_anchors_ = true
 
-[node name="Row of cubes(trademark)" type="MeshInstance3D" parent="." unique_id=1945763015]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.69012046, 0.50918794, -5.5912275)
-mesh = SubResource("BoxMesh_km5ld")
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1924928714]
+spawn_path = NodePath("..")
+script = ExtResource("6_1ainy")
+PlayerScene = ExtResource("7_n6hdu")
 
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=2049934631]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.0083194)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=2111107521]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.9661875)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D6" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=245030811]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.9526682)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D7" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=323250293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.949047)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D8" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=1744661686]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.946557)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D9" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=310008409]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.9492645)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="MeshInstance3D10" type="MeshInstance3D" parent="Row of cubes(trademark)" unique_id=385393608]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.946889)
-mesh = SubResource("BoxMesh_km5ld")
-
-[node name="Dummy" parent="." unique_id=2038199148 instance=ExtResource("9_i2t4f")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.4962387, 0.96234894, -6.0235653)
-lock_rotation = true
-
-[node name="Health" type="Node3D" parent="Dummy" unique_id=85836694]
-script = ExtResource("3_oi3di")
-IsDummy = true
-
-[node name="Wepon" type="Node3D" parent="Dummy" unique_id=1116137070]
-script = ExtResource("5_km5ld")
-
-[node name="WeponHitbox" type="Area3D" parent="Dummy/Wepon" unique_id=1941485906]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Dummy/Wepon/WeponHitbox" unique_id=442765072]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.2261963)
-shape = SubResource("BoxShape3D_8cye3")
-
-[connection signal="pressed" from="ButtonMenu/Button" to="Player" method="_on_button_pressed"]
 [connection signal="pressed" from="ButtonMenu/Button" to="ButtonMenu" method="_on_button_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button3" to="Player" method="_on_button_3_pressed"]
 [connection signal="pressed" from="ButtonMenu/Button3" to="ButtonMenu" method="_on_button_3_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button4" to="Player" method="_on_button_4_pressed"]
 [connection signal="pressed" from="ButtonMenu/Button4" to="ButtonMenu" method="_on_button_4_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button2" to="Player" method="_on_button_2_pressed"]
 [connection signal="pressed" from="ButtonMenu/Button2" to="ButtonMenu" method="_on_button_2_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button5" to="Player" method="_on_button_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button6" to="Player" method="_on_button_3_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button9" to="Player" method="_on_button_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button10" to="Player" method="_on_button_3_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button12" to="Player" method="_on_button_2_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button13" to="Player" method="_on_button_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button14" to="Player" method="_on_button_3_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button15" to="Player" method="_on_button_4_pressed"]
-[connection signal="pressed" from="ButtonMenu/Button16" to="Player" method="_on_button_2_pressed"]

@@ -50,6 +50,8 @@ func _ready() -> void:
 		
 
 func _physics_process(delta: float) -> void:
+	if !is_multiplayer_authority():
+		return
 	if Moving and int(FramesMoved) <= int( Frames):
 		if PlayerRb != null:
 			var forward_direction = -PlayerRb.global_transform.basis.z
@@ -225,34 +227,33 @@ func _on_hitbox_collided(collided_object: Node3D) -> void:
 	if(collided_object == get_parent_node_3d()):
 		return
 	var AttackScript = load("res://Attack.gd")
-	print("COLLIDED")
-	print(collided_object.name)
-	print(collided_object.get_child(3).name)
-	if(collided_object.get_child(3).get_script() != null):
-		if(collided_object.get_child(3).get_script() == AttackScript):
-			print("Damaged other player")
-			#apply knockback
-			var EnemyIsBlocking = collided_object.get_child(3).get("Blocking");
+	if collided_object.get_child_count() > 3:
+		if(collided_object.get_child(3).get_script() != null):
+			if(collided_object.get_child(3).get_script() == AttackScript):
+				print("Damaged other player")
+				#apply knockback
+				var EnemyIsBlocking = collided_object.get_child(3).get("Blocking");
 			
 			
 			
-			var rb =collided_object as RigidBody3D 
-			if(!EnemyIsBlocking or DestroyBlock):
-				var forward = PlayerScript.twist_pivot.global_transform.basis.z * -1
-				rb.apply_central_force(forward * 550)
-				print("Apply Force")
-				ApplyEffects("Blocking", 0.2)
-			else:
-				var forward = PlayerScript.twist_pivot.global_transform.basis.z * -1
-				PlayerRb.apply_central_force(forward * -550)
+				var rb =collided_object as RigidBody3D 
+				if(!EnemyIsBlocking or DestroyBlock):
+					var forward = PlayerScript.twist_pivot.global_transform.basis.z * -1
+					rb.apply_central_force(forward * 550)
+					print("Apply Force")
+					ApplyEffects("Blocking", 0.2)
+				else:
+					var forward = PlayerScript.twist_pivot.global_transform.basis.z * -1
+					PlayerRb.apply_central_force(forward * -550)
 	var HealthScriptEnemy = preload("res://HealthScript.gd")
-	if collided_object.get_child(2).get_script() == HealthScriptEnemy:
-		print("DAMAGE")
-	for child in collided_object.get_children():
-		if child.get_script() == HealthScriptEnemy:
-			if child.has_method("TakeDamage"):
-				child.TakeDamage()
-				return
+	if collided_object.get_child_count() >= 3:
+		if collided_object.get_child(2).get_script() == HealthScriptEnemy:
+			print("DAMAGE")
+		for child in collided_object.get_children():
+			if child.get_script() == HealthScriptEnemy:
+				if child.has_method("TakeDamage"):
+					child.TakeDamage()
+					return
 				
 				
 func UpdateChips():

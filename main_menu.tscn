@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://dsg17sks6ijkl"]
+
+[ext_resource type="Script" uid="uid://bmt1sulpgrakl" path="res://LobbySystem.gd" id="1_06t4h"]
+[ext_resource type="Script" uid="uid://bm4fl2t5wla5p" path="res://MultiplayerManager.gd" id="2_7vrkn"]
+
+[node name="MainMenu" type="Node2D" unique_id=1561447104]
+script = ExtResource("1_06t4h")
+
+[node name="Node" type="Node" parent="." unique_id=2087065238]
+script = ExtResource("2_7vrkn")
+
+[node name="LobbyContainer" type="ScrollContainer" parent="." unique_id=1191149898]
+offset_left = 1386.0
+offset_top = 1.0
+offset_right = 1907.0
+offset_bottom = 1083.0
+
+[node name="Lobbies" type="VBoxContainer" parent="LobbyContainer" unique_id=1629406042]
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="." unique_id=984373909]
+offset_left = 1.0
+offset_top = 5.0
+offset_right = 624.1875
+offset_bottom = 343.0
+text = "Host"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="HostButton" unique_id=580092455]
+spawn_path = NodePath("../..")
+
+[node name="RefreshButton" type="Button" parent="." unique_id=1948600436]
+offset_left = 800.0
+offset_right = 1261.0
+offset_bottom = 136.0
+text = "Refresh"
+
+[connection signal="pressed" from="HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="RefreshButton" to="." method="_on_refresh_button_pressed"]
